@@ -3,12 +3,22 @@ package edu.jsu.mcis.tas_fa19;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.GregorianCalendar;
+import java.time.LocalDate;
+
 
 public class Punch {
     private String id;
+    private String punchtypeid;
     private String terminalid;
     private Badge badgeid;
     private GregorianCalendar originalTimeStamp;
+    private LocalDate OriginalTimeStamp;
+    
+    public Punch(Badge badgeid, String terminalid, String punchtypeid) {
+        this.punchtypeid = punchtypeid;
+        this.terminalid = terminalid;
+        this.badgeid = badgeid;
+    }
     
     public void setOriginalTimeStamp(String info)//a punch pulled from sql
     {
@@ -30,13 +40,13 @@ public class Punch {
         
         switch(punchtypeid)
         {
-            case 0:
+            case "0":
                 output.concat(" CLOCKED OUT: ");
                 break;
-            case 1:
+            case "1":
                 output.concat(" CLOCKED IN");
                 break;
-            case 2:
+            case "2":
                 output.concat(" TIMEOUT");
                 break;
         }
@@ -46,5 +56,45 @@ public class Punch {
         output.concat(dtf.format((TemporalAccessor) this.originalTimeStamp.getTime()));
         
         return output;
+    }
+    
+    public String getPunchTypeID(){
+        return punchtypeid;
+    }
+    
+    public String getTerminalID(){
+        return terminalid;
+    }
+    
+    public Badge getBadgeID(){
+        return badgeid;
+    }
+    
+    public String getID() {
+        return id;
+    }
+    
+    public LocalDate getOriginalTimeStamp(){
+        return OriginalTimeStamp;
+    }
+    
+    public void setID(String id) {
+        this.id = id;
+    }
+    
+    public void setPunchTypeID(String punchtypeid) {
+        this.punchtypeid = punchtypeid;
+    }
+    
+    public void setTerminalID(String terminalid) {
+        this.terminalid = terminalid;
+    }
+    
+    public void setBadgeID(Badge badgeid) {
+        this.badgeid = badgeid;
+    }
+    
+    public void setOriginalTimeStamp(LocalDate OriginalTimeStamp){
+        this.OriginalTimeStamp = OriginalTimeStamp;
     }
 }
