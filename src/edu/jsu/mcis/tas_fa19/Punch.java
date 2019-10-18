@@ -13,13 +13,13 @@ public class Punch {
     private Badge badgeid;
     private GregorianCalendar originalTimeStamp;
     private LocalDate OriginalTimeStamp;
-    
+
     public Punch(Badge badgeid, String terminalid, String punchtypeid) {
         this.punchtypeid = punchtypeid;
         this.terminalid = terminalid;
         this.badgeid = badgeid;
-    }
-    
+    }    
+
     public void setOriginalTimeStamp(String info)//a punch pulled from sql
     {
         String parts[] = info.split(" ");
@@ -56,8 +56,8 @@ public class Punch {
         output.concat(dtf.format((TemporalAccessor) this.originalTimeStamp.getTime()));
         
         return output;
-    }
-    
+    }    
+
     public String getPunchTypeID(){
         return punchtypeid;
     }
@@ -72,7 +72,7 @@ public class Punch {
     
     public String getID() {
         return id;
-    }
+    }    
     
     public LocalDate getOriginalTimeStamp(){
         return OriginalTimeStamp;
@@ -92,7 +92,7 @@ public class Punch {
     
     public void setBadgeID(Badge badgeid) {
         this.badgeid = badgeid;
-    }
+    }     
     
     public void setOriginalTimeStamp(LocalDate OriginalTimeStamp){
         this.OriginalTimeStamp = OriginalTimeStamp;
