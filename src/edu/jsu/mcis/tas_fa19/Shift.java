@@ -1,7 +1,6 @@
 package edu.jsu.mcis.tas_fa19;
 
 import java.time.LocalTime;
-import java.util.GregorianCalendar;
 
 public class Shift {
     //Changed this from "String" to "int" considering Feature1.java tests the Shift object with an integer for "id"
@@ -25,7 +24,8 @@ public class Shift {
         //Constructor
     }
 
-    public Shift(int id, String Description, LocalTime start, LocalTime stop, int interval, int graceperiod, int dock, LocalTime lunchstart, LocalTime lunchstop, int lunchdeduct) {
+    public Shift(int id, String Description, LocalTime start, LocalTime stop, int interval,
+                 int graceperiod, int dock, LocalTime lunchstart, LocalTime lunchstop, int lunchdeduct) {
         this.id = id;
         this.Description = Description;
         this.start = start;
@@ -59,16 +59,16 @@ public class Shift {
         return start;
     }
 
-    public void setStart(LocalTime start) {
-        this.start = start;
+    public void setStart(String start) {
+        this.start = LocalTime.parse(start);
     }
 
     public LocalTime getStop() {
         return stop;
     }
 
-    public void setStop(LocalTime stop) {
-        this.stop = stop;
+    public void setStop(String stop) {
+        this.stop = LocalTime.parse(stop);
     }
 
     public int getInterval() {
@@ -99,16 +99,16 @@ public class Shift {
         return lunchstart;
     }
 
-    public void setLunchStart(LocalTime lunchstart) {
-        this.lunchstart = lunchstart;
+    public void setLunchStart(String lunchstart) {
+        this.lunchstart = LocalTime.parse(lunchstart);
     }
 
     public LocalTime getLunchStop() {
         return lunchstop;
     }
 
-    public void setLunchStop(LocalTime lunchstop) {
-        this.lunchstop = lunchstop;
+    public void setLunchStop(String lunchstop) {
+        this.lunchstop = LocalTime.parse(lunchstop);
     }
 
     public int getLunchDeduct() {
@@ -126,18 +126,15 @@ public class Shift {
         String output = "";
         output.concat(id + ", ");
         output.concat(Description + ", ");
-        output.concat(start.toString() + ", ");
-        output.concat(stop.toString() + ", ");
-        output.concat(Integer.toString(interval) + ", ");
-        output.concat(Integer.toString(graceperiod) + ", ");
-        output.concat(Integer.toString(dock) + ", ");
-        output.concat(lunchstart.toString() + ", ");
-        output.concat(lunchstop.toString() + ", ");
-        output.concat(Integer.toString(lunchdeduct) + ", ");
+        output.concat(start + ", ");
+        output.concat(stop + ", ");
+        output.concat(interval + ", ");
+        output.concat(graceperiod + ", ");
+        output.concat(dock + ", ");
+        output.concat(lunchstart + ", ");
+        output.concat(lunchstop + ", ");
+        output.concat(lunchdeduct + ", ");
 
         return output;
     }
-
-
-
 }

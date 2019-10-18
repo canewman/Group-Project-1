@@ -184,8 +184,9 @@ public class TASDatabase {
 
                         //Pull the information from the database and store it
                         while (resultSet.next()) {
-                            //Add punch information to Punch object
+                            //Add shift information to Shift object
                             if (resultSet.getInt("id") == shiftID) {
+                                shiftResults.setID(resultSet.getInt("id"));
                                 shiftResults.setDescription(resultSet.getNString("description"));
                                 shiftResults.setStart(resultSet.getNString("start"));
                                 shiftResults.setStop(resultSet.getNString("stop"));
@@ -224,8 +225,41 @@ public class TASDatabase {
             //Create new Shift object
             shiftResults = new Shift();
 
+            int shiftID = 0;
+
             //Test connection
             if (conn.isValid(0)) {
+
+                //Prepare select query
+                query = "SELECT * FROM employee";
+                pstSelect = conn.prepareStatement(query);
+
+                //Execute select query
+                System.out.println("Submitting query for employee information ...");
+                hasResults = pstSelect.execute();
+
+                //Get results
+                System.out.println("Getting employee information ...");
+
+                //While there is information, retrieve it
+                while (hasResults || pstSelect.getUpdateCount() != -1) {
+                    if (hasResults) {
+
+                        //Get ResultSet Metadata
+                        resultSet = pstSelect.getResultSet();
+
+                        //Pull the information from the database and store it
+                        while (resultSet.next()) {
+                            //Add shift information to Shift object
+                            if (resultSet.getNString("badgeid") == badge.getId()) {
+                                shiftID = resultSet.getInt("shiftid");
+                            }
+                        }
+
+                        //Check for more data
+                        hasResults = pstSelect.getMoreResults();
+                    }
+                }
 
                 //Prepare select query
                 query = "SELECT * FROM shift";
@@ -247,17 +281,18 @@ public class TASDatabase {
 
                         //Pull the information from the database and store it
                         while (resultSet.next()) {
-                            //Add punch information to Punch object
+                            //Add shift information to Shift object
                             if (resultSet.getInt("id") == shiftID) {
+                                shiftResults.setID(resultSet.getInt("id"));
                                 shiftResults.setDescription(resultSet.getNString("description"));
                                 shiftResults.setStart(resultSet.getNString("start"));
                                 shiftResults.setStop(resultSet.getNString("stop"));
-                                shiftResults.setInterval(resultSet.getNString("interval"));
-                                shiftResults.setGracePeriod(resultSet.getNString("graceperiod"));
-                                shiftResults.setDock(resultSet.getNString("dock"));
+                                shiftResults.setInterval(resultSet.getInt("interval"));
+                                shiftResults.setGracePeriod(resultSet.getInt("graceperiod"));
+                                shiftResults.setDock(resultSet.getInt("dock"));
                                 shiftResults.setLunchStart(resultSet.getNString("lunchstart"));
                                 shiftResults.setLunchStop(resultSet.getNString("lunchstop"));
-                                shiftResults.setLunchDeduct(resultSet.getNString("lunchdeduct"));
+                                shiftResults.setLunchDeduct(resultSet.getInt("lunchdeduct"));
                                 gotResults = true;
                             }
                         }
