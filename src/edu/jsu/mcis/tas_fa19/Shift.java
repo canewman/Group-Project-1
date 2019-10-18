@@ -4,7 +4,9 @@ import java.time.LocalTime;
 import java.util.GregorianCalendar;
 
 public class Shift {
-    private String id;
+    //Changed this from "String" to "int" considering Feature1.java tests the Shift object with an integer for "id"
+    private int id;
+
     private String Description;
     private LocalTime start;
     private LocalTime stop;
@@ -16,10 +18,14 @@ public class Shift {
     private int lunchdeduct;
     private int lunchduration;
     //needed at a later point
-    private String adjustmenttype;    
+    private String adjustmenttype;
     private LocalTime hms; //hours minutes seconds
 
-    public Shift(String id, String Description, LocalTime start, LocalTime stop, int interval, int graceperiod, int dock, LocalTime lunchstart, LocalTime lunchstop, int lunchdeduct) {
+    public Shift() {
+        //Constructor
+    }
+
+    public Shift(int id, String Description, LocalTime start, LocalTime stop, int interval, int graceperiod, int dock, LocalTime lunchstart, LocalTime lunchstop, int lunchdeduct) {
         this.id = id;
         this.Description = Description;
         this.start = start;
@@ -30,14 +36,14 @@ public class Shift {
         this.lunchstart = lunchstart;
         this.lunchstop = lunchstop;
         this.lunchdeduct = lunchdeduct;
-    }      
-    
+    }
 
-    public String getId() {
+
+    public int getID() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setID(int id) {
         this.id = id;
     }
 
@@ -73,11 +79,11 @@ public class Shift {
         this.interval = interval;
     }
 
-    public int getGraceperiod() {
+    public int getGracePeriod() {
         return graceperiod;
     }
 
-    public void setGraceperiod(int graceperiod) {
+    public void setGracePeriod(int graceperiod) {
         this.graceperiod = graceperiod;
     }
 
@@ -89,27 +95,27 @@ public class Shift {
         this.dock = dock;
     }
 
-    public LocalTime getLunchstart() {
+    public LocalTime getLunchStart() {
         return lunchstart;
     }
 
-    public void setLunchstart(LocalTime lunchstart) {
+    public void setLunchStart(LocalTime lunchstart) {
         this.lunchstart = lunchstart;
     }
 
-    public LocalTime getLunchstop() {
+    public LocalTime getLunchStop() {
         return lunchstop;
     }
 
-    public void setLunchstop(LocalTime lunchstop) {
+    public void setLunchStop(LocalTime lunchstop) {
         this.lunchstop = lunchstop;
     }
 
-    public int getLunchdeduct() {
+    public int getLunchDeduct() {
         return lunchdeduct;
     }
 
-    public void setLunchdeduct(int lunchdeduct) {
+    public void setLunchDeduct(int lunchdeduct) {
         this.lunchdeduct = lunchdeduct;
     }
 
@@ -128,10 +134,10 @@ public class Shift {
         output.concat(lunchstart.toString() + ", ");
         output.concat(lunchstop.toString() + ", ");
         output.concat(Integer.toString(lunchdeduct) + ", ");
-        
+
         return output;
     }
-    
-    
-    
+
+
+
 }

@@ -130,7 +130,7 @@ public class TASDatabase {
                             if (resultSet.getInt("id") == punchID) {
                                 punchResults.setTerminalID(resultSet.getNString("terminalid"));
                                 punchResults.setBadgeID(resultSet.getNString("badgeid"));
-                                punchResults.setOriginalTimeStamp(resultSet.getNString("originaltimestamp"));
+                                punchResults.setOriginalTimestamp(resultSet.getNString("originaltimestamp"));
                                 punchResults.setPunchTypeID(resultSet.getNString("punchtypeid"));
                                 gotResults = true;
                             }
@@ -189,12 +189,12 @@ public class TASDatabase {
                                 shiftResults.setDescription(resultSet.getNString("description"));
                                 shiftResults.setStart(resultSet.getNString("start"));
                                 shiftResults.setStop(resultSet.getNString("stop"));
-                                shiftResults.setInterval(resultSet.getNString("interval"));
-                                shiftResults.setGracePeriod(resultSet.getNString("graceperiod"));
-                                shiftResults.setDock(resultSet.getNString("dock"));
+                                shiftResults.setInterval(resultSet.getInt("interval"));
+                                shiftResults.setGracePeriod(resultSet.getInt("graceperiod"));
+                                shiftResults.setDock(resultSet.getInt("dock"));
                                 shiftResults.setLunchStart(resultSet.getNString("lunchstart"));
                                 shiftResults.setLunchStop(resultSet.getNString("lunchstop"));
-                                shiftResults.setLunchDeduct(resultSet.getNString("lunchdeduct"));
+                                shiftResults.setLunchDeduct(resultSet.getInt("lunchdeduct"));
                                 gotResults = true;
                             }
                         }
