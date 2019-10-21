@@ -7,6 +7,9 @@ public class Badge {
     public Badge() {
         //Constructor
     }
+    public String toString(){
+        return this.id+"( " +this.description+ " )" ;
+    }
 
     public Badge(String id, String description) {
         this.id = id;
