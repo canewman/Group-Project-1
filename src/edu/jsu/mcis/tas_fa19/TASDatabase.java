@@ -21,7 +21,7 @@ public class TASDatabase {
         try {
             //Identify the Server
             String server = ("jdbc:mysql://localhost/tas");
-            String username = "root";
+            String username = "db_user";
             String password = "CS488";
             System.out.println("Connecting to " + server + "...");
 
@@ -72,8 +72,8 @@ public class TASDatabase {
                         //Pull the information from the database and store it
                         while (resultSet.next()) {
                             //Add badge information to Badge object
-                            if (resultSet.getNString("id") == badgeID) {
-                                badgeResults.setDescription(resultSet.getNString("description"));
+                            if (resultSet.getString("id") == badgeID) {
+                                badgeResults.setDescription(resultSet.getString("description"));
                                 gotResults = true;
                             }
                         }
@@ -128,10 +128,10 @@ public class TASDatabase {
                         while (resultSet.next()) {
                             //Add punch information to Punch object
                             if (resultSet.getInt("id") == punchID) {
-                                punchResults.setTerminalID(resultSet.getNString("terminalid"));
-                                punchResults.setBadgeID(resultSet.getNString("badgeid"));
-                                punchResults.setOriginalTimestamp(resultSet.getNString("originaltimestamp"));
-                                punchResults.setPunchTypeID(resultSet.getNString("punchtypeid"));
+                                punchResults.setTerminalID(resultSet.getString("terminalid"));
+                                punchResults.setBadgeID(resultSet.getString("badgeid"));
+                                punchResults.setOriginalTimestamp(resultSet.getString("originaltimestamp"));
+                                punchResults.setPunchTypeID(resultSet.getString("punchtypeid"));
                                 gotResults = true;
                             }
                         }
@@ -187,14 +187,14 @@ public class TASDatabase {
                             //Add shift information to Shift object
                             if (resultSet.getInt("id") == shiftID) {
                                 shiftResults.setID(resultSet.getInt("id"));
-                                shiftResults.setDescription(resultSet.getNString("description"));
-                                shiftResults.setStart(resultSet.getNString("start"));
-                                shiftResults.setStop(resultSet.getNString("stop"));
+                                shiftResults.setDescription(resultSet.getString("description"));
+                                shiftResults.setStart(resultSet.getString("start"));
+                                shiftResults.setStop(resultSet.getString("stop"));
                                 shiftResults.setInterval(resultSet.getInt("interval"));
                                 shiftResults.setGracePeriod(resultSet.getInt("graceperiod"));
                                 shiftResults.setDock(resultSet.getInt("dock"));
-                                shiftResults.setLunchStart(resultSet.getNString("lunchstart"));
-                                shiftResults.setLunchStop(resultSet.getNString("lunchstop"));
+                                shiftResults.setLunchStart(resultSet.getString("lunchstart"));
+                                shiftResults.setLunchStop(resultSet.getString("lunchstop"));
                                 shiftResults.setLunchDeduct(resultSet.getInt("lunchdeduct"));
                                 gotResults = true;
                             }
@@ -251,7 +251,7 @@ public class TASDatabase {
                         //Pull the information from the database and store it
                         while (resultSet.next()) {
                             //Add shift information to Shift object
-                            if (resultSet.getNString("badgeid") == badge.getId()) {
+                            if (resultSet.getString("badgeid") == badge.getId()) {
                                 shiftID = resultSet.getInt("shiftid");
                             }
                         }
@@ -284,14 +284,14 @@ public class TASDatabase {
                             //Add shift information to Shift object
                             if (resultSet.getInt("id") == shiftID) {
                                 shiftResults.setID(resultSet.getInt("id"));
-                                shiftResults.setDescription(resultSet.getNString("description"));
-                                shiftResults.setStart(resultSet.getNString("start"));
-                                shiftResults.setStop(resultSet.getNString("stop"));
+                                shiftResults.setDescription(resultSet.getString("description"));
+                                shiftResults.setStart(resultSet.getString("start"));
+                                shiftResults.setStop(resultSet.getString("stop"));
                                 shiftResults.setInterval(resultSet.getInt("interval"));
                                 shiftResults.setGracePeriod(resultSet.getInt("graceperiod"));
                                 shiftResults.setDock(resultSet.getInt("dock"));
-                                shiftResults.setLunchStart(resultSet.getNString("lunchstart"));
-                                shiftResults.setLunchStop(resultSet.getNString("lunchstop"));
+                                shiftResults.setLunchStart(resultSet.getString("lunchstart"));
+                                shiftResults.setLunchStop(resultSet.getString("lunchstop"));
                                 shiftResults.setLunchDeduct(resultSet.getInt("lunchdeduct"));
                                 gotResults = true;
                             }

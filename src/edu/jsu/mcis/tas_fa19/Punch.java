@@ -35,7 +35,14 @@ public class Punch {
         String parts[] = info.split(" ");
         String day[] = parts[0].split("-");
         String time[] = parts[1].split(":");
-        this.originalTimeStamp = new GregorianCalendar(Integer.parseInt(day[0]), Integer.parseInt(day[1]), Integer.parseInt(day[2]), Integer.parseInt(time[0]), Integer.parseInt(time[1]), Integer.parseInt(time[2]));
+        this.originalTimeStamp = new GregorianCalendar(
+                Integer.parseInt(day[0]),
+                Integer.parseInt(day[1]),
+                Integer.parseInt(day[2]),
+                Integer.parseInt(time[0]),
+                Integer.parseInt(time[1]),
+                //Had to parse as Double and cast back to Int to get rid of decimal
+                (int) Double.parseDouble(time[2]));
     }
 
     public void setOriginalTimestamp()//a new punch using current time
