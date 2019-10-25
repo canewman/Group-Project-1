@@ -1,7 +1,6 @@
 package edu.jsu.mcis.tas_fa19;
 
 import java.sql.*;
-import java.util.GregorianCalendar;
 
 public class TASDatabase {
 
@@ -73,7 +72,7 @@ public class TASDatabase {
                         //Pull the information from the database and store it
                         while (resultSet.next()) {
                             //Add badge information to Badge object
-                            if (resultSet.getString("id") == badgeID) {
+                            if (resultSet.getString("id").equals(badgeID)) {
                                 badgeResults.setDescription(resultSet.getString("description"));
                                 gotResults = true;
                             }
@@ -107,7 +106,7 @@ public class TASDatabase {
             //Test connection
             if (conn.isValid(0)) {
 
-                //Prepare select query
+                //Prepare select query, this one is different, additionally it gets the timestamps as milliseconds
                 query = "SELECT *, UNIX_TIMESTAMP(originaltimestamp) * 1000 AS ts FROM punch";
                 pstSelect = conn.prepareStatement(query);
 
@@ -132,6 +131,7 @@ public class TASDatabase {
 
                                 punchResults.setTerminalID(resultSet.getString("terminalid"));
                                 punchResults.setBadgeID(resultSet.getString("badgeid"));
+                                //Get the milliseconds as a "Long"
                                 punchResults.setOriginalTimestamp(resultSet.getLong("ts"));
                                 punchResults.setPunchTypeID(resultSet.getString("punchtypeid"));
                                 gotResults = true;
@@ -254,7 +254,7 @@ public class TASDatabase {
                         //Pull the information from the database and store it
                         while (resultSet.next()) {
                             //Add shift information to Shift object
-                            if (resultSet.getString("badgeid") == badge.getId()) {
+                            if (resultSet.getString("badgeid").equals(badge.getId())) {
                                 shiftID = resultSet.getInt("shiftid");
                             }
                         }
