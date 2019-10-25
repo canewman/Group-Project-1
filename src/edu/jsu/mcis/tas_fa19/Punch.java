@@ -1,10 +1,7 @@
 package edu.jsu.mcis.tas_fa19;
 
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
+import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
-import java.time.LocalDate;
-
 
 public class Punch {
     //Changed this from "String" to "int" considering Feature1.java tests the Punch object with an integer for "id"
@@ -14,8 +11,8 @@ public class Punch {
     //Changed this from "Badge" to "String" because its not the full object, its just a string that shows the badge ID
     private String badgeid;
 
-    private GregorianCalendar originalTimeStamp;
-    private LocalDate OriginalTimeStamp;
+    private long originalTimeStamp;
+    private GregorianCalendar gc = new GregorianCalendar();
 
     public Punch() {
         //Constructor
@@ -30,61 +27,44 @@ public class Punch {
         this.badgeid = badgeid;
     }
 
-    public void setOriginalTimestamp(String info)//a punch pulled from sql
+    public void setOriginalTimestamp(long ts)//a punch pulled from sql
     {
-        String parts[] = info.split(" ");
-        String day[] = parts[0].split("-");
-        String time[] = parts[1].split(":");
-        this.originalTimeStamp = new GregorianCalendar(
-                Integer.parseInt(day[0]),
-                Integer.parseInt(day[1]),
-                Integer.parseInt(day[2]),
-                Integer.parseInt(time[0]),
-                Integer.parseInt(time[1]),
-                //Had to parse as Double and cast back to Int to get rid of decimal
-                (int) Double.parseDouble(time[2]));
+       gc.setTimeInMillis(ts);
     }
 
-    public void setOriginalTimestamp()//a new punch using current time
-    {
-        this.originalTimeStamp = new GregorianCalendar();
-    }
+    public String printOriginalTimestamp() {
+        StringBuilder output = new StringBuilder("#");
+        output.append(badgeid); // No ".toString()" method needed here since its now a String
 
-    public String printOriginalTimestamp()
-    {
-        String output = "";
-        output.concat(badgeid); // No ".toString()" method needed here since its now a String
-
-        switch(punchtypeid)
-        {
+        switch (punchtypeid) {
             case "0":
-                output.concat(" CLOCKED OUT: ");
+                output.append(" CLOCKED OUT:");
                 break;
             case "1":
-                output.concat(" CLOCKED IN");
+                output.append(" CLOCKED IN:");
                 break;
             case "2":
-                output.concat(" TIMEOUT");
+                output.append(" TIMED OUT:");
                 break;
         }
-        output.concat(" ");
+        output.append(" ");
 
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss");
-        output.concat(dtf.format((TemporalAccessor) this.originalTimeStamp.getTime()));
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE MM/dd/yyyy HH:mm:ss");
+        output.append(sdf.format(getOriginalTimeStamp().getTime()).toUpperCase());
 
-        return output;
+        return output.toString();
     }
 
-    public String getPunchTypeID(){
+    public String getPunchTypeID() {
         return punchtypeid;
     }
 
-    public String getTerminalID(){
+    public String getTerminalID() {
         return terminalid;
     }
 
     //Changed this from "Badge" to "String"
-    public String getBadgeID(){
+    public String getBadgeID() {
         return badgeid;
     }
 
@@ -93,8 +73,8 @@ public class Punch {
         return id;
     }
 
-    public LocalDate getOriginalTimeStamp(){
-        return OriginalTimeStamp;
+    public GregorianCalendar getOriginalTimeStamp() {
+        return gc;
     }
 
     //Changed "String" to "int"
@@ -113,9 +93,5 @@ public class Punch {
     //Changed from "Badge" to "String"
     public void setBadgeID(String badgeid) {
         this.badgeid = badgeid;
-    }
-
-    public void setOriginalTimeStamp(LocalDate OriginalTimeStamp){
-        this.OriginalTimeStamp = OriginalTimeStamp;
     }
 }

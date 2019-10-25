@@ -7,9 +7,6 @@ public class Badge {
     public Badge() {
         //Constructor
     }
-    public String toString(){
-        return this.id+"( " +this.description+ " )" ;
-    }
 
     public Badge(String id, String description) {
         this.id = id;
@@ -32,5 +29,14 @@ public class Badge {
         this.description = description;
     }
 
+    @Override
+    public String toString()
+    {
+        String output = "#";
+        output.concat(id);
+        output.concat(description);
+
+        return output;
+    }
 
 }

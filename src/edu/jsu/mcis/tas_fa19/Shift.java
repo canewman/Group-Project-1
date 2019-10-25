@@ -1,5 +1,6 @@
 package edu.jsu.mcis.tas_fa19;
 
+import java.time.Duration;
 import java.time.LocalTime;
 
 public class Shift {
@@ -9,13 +10,14 @@ public class Shift {
     private String Description;
     private LocalTime start;
     private LocalTime stop;
+    private long shiftduration;
     private int interval;
     private int graceperiod;
     private int dock;
     private LocalTime lunchstart;
     private LocalTime lunchstop;
     private int lunchdeduct;
-    private int lunchduration;
+    private long lunchduration;
     //needed at a later point
     private String adjustmenttype;
     private LocalTime hms; //hours minutes seconds
@@ -119,22 +121,29 @@ public class Shift {
         this.lunchdeduct = lunchdeduct;
     }
 
+    //Used "Duration" to find the duration of the shift in minutes
+    public long getShiftDuration(LocalTime start, LocalTime stop) {
+        return this.shiftduration = Duration.between(start, stop).toMinutes();
+    }
+
+    //Used "Duration" to find the duration of the lunch in minutes
+    public long getLunchDuration(LocalTime lunchstart, LocalTime lunchstop) {
+        return this.lunchduration = Duration.between(lunchstart, lunchstop).toMinutes();
+    }
+
 
     @Override
     public String toString()
     {
-        String output = "";
-        output.concat(id + ", ");
-        output.concat(Description + ", ");
-        output.concat(start + ", ");
-        output.concat(stop + ", ");
-        output.concat(interval + ", ");
-        output.concat(graceperiod + ", ");
-        output.concat(dock + ", ");
-        output.concat(lunchstart + ", ");
-        output.concat(lunchstop + ", ");
-        output.concat(lunchdeduct + ", ");
+        StringBuilder output = new StringBuilder();
+        output.append(Description +": ");
+        output.append(start + " - ");
+        output.append(stop);
+        output.append(" (" + getShiftDuration(start, stop) + " minutes); ");
+        output.append("Lunch: " + lunchstart + " - ");
+        output.append(lunchstop);
+        output.append(" (" + getLunchDuration(lunchstart, lunchstop) + " minutes)");
 
-        return output;
+        return output.toString();
     }
 }

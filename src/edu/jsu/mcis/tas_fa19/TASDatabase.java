@@ -1,6 +1,7 @@
 package edu.jsu.mcis.tas_fa19;
 
 import java.sql.*;
+import java.util.GregorianCalendar;
 
 public class TASDatabase {
 
@@ -107,7 +108,7 @@ public class TASDatabase {
             if (conn.isValid(0)) {
 
                 //Prepare select query
-                query = "SELECT * FROM punch";
+                query = "SELECT *, UNIX_TIMESTAMP(originaltimestamp) * 1000 AS ts FROM punch";
                 pstSelect = conn.prepareStatement(query);
 
                 //Execute select query
@@ -128,11 +129,13 @@ public class TASDatabase {
                         while (resultSet.next()) {
                             //Add punch information to Punch object
                             if (resultSet.getInt("id") == punchID) {
+
                                 punchResults.setTerminalID(resultSet.getString("terminalid"));
                                 punchResults.setBadgeID(resultSet.getString("badgeid"));
-                                punchResults.setOriginalTimestamp(resultSet.getString("originaltimestamp"));
+                                punchResults.setOriginalTimestamp(resultSet.getLong("ts"));
                                 punchResults.setPunchTypeID(resultSet.getString("punchtypeid"));
                                 gotResults = true;
+                                System.out.println("Got results!");
                             }
                         }
 
