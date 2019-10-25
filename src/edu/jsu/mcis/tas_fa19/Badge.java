@@ -32,11 +32,11 @@ public class Badge {
     @Override
     public String toString()
     {
-        String output = "#";
-        output.concat(id);
-        output.concat(description);
+        StringBuilder output = new StringBuilder("#");
+        output.append(id);
+        output.append(" (" + description + ")");
 
-        return output;
+        return output.toString();
     }
 
 }
