@@ -129,11 +129,11 @@ public class TASDatabase {
                             //Add punch information to Punch object
                             if (resultSet.getInt("id") == punchID) {
 
-                                punchResults.setTerminalID(resultSet.getString("terminalid"));
-                                punchResults.setBadgeID(resultSet.getString("badgeid"));
+                                punchResults.setTerminalID(resultSet.getInt("terminalid"));
+                                punchResults.setBadgeid(resultSet.getString("badgeid"));
                                 //Get the milliseconds as a "Long"
                                 punchResults.setOriginalTimestamp(resultSet.getLong("ts"));
-                                punchResults.setPunchTypeID(resultSet.getString("punchtypeid"));
+                                punchResults.setPunchTypeID(resultSet.getInt("punchtypeid"));
                                 gotResults = true;
                                 System.out.println("Got results!");
                             }
