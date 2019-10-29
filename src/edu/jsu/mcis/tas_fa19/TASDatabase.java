@@ -1,6 +1,8 @@
 package edu.jsu.mcis.tas_fa19;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.GregorianCalendar;
 
 public class TASDatabase {
 
@@ -319,6 +321,87 @@ public class TASDatabase {
         }
         return null;
     }
+    
+    
+    public ArrayList<Punch> getDailyPunchList(Badge badge, long ts){
+    
+        try {
+            //Create new Punch ArrayList
+            ArrayList<Punch> punches = new ArrayList();
+            GregorianCalendar gcBegin = new GregorianCalendar(); //begining of the day
+            GregorianCalendar gcEnd = new GregorianCalendar(); //end of the day
+            gcBegin.setTimeInMillis(ts);
+            gcEnd.setTimeInMillis(ts);
+            
+            gcBegin.set(3, 00); //hours
+            gcBegin.set(4, 00); //minutes
+            gcBegin.set(5, 00); //seconds
+            
+            gcEnd.set(3, 23); //hours
+            gcEnd.set(4, 59); //minutes
+            gcEnd.set(5, 59); //seconds
+            
+            
+
+            //Test connection
+            if (conn.isValid(0)) {
+
+                //Prepare select query, this one is different, additionally it gets the timestamps as milliseconds
+                query = "SELECT * from punch where originaltimestamp BETWEEN '" + gcBegin +"' AND '" + gcEnd + "'";
+                pstSelect = conn.prepareStatement(query);
+
+                //Execute select query
+                System.out.println("Submitting query for punch information ...");
+                hasResults = pstSelect.execute();
+
+                //Get results
+                System.out.println("Getting punch information ...");
+
+                //While there is information, retrieve it
+                while (hasResults || pstSelect.getUpdateCount() != -1) {
+                    if (hasResults) {
+
+                        //Get ResultSet Metadata
+                        resultSet = pstSelect.getResultSet();
+
+                        //Pull the information from the database and store it
+                        while (resultSet.next()) {
+                            
+                            punchResults = new Punch();
+                            //Add punch information to Punch object
+                            if (resultSet.getString("badgeid").equals(badge.getId())) {
+
+                                punchResults.setTerminalID(resultSet.getInt("terminalid"));
+                                punchResults.setBadgeid(resultSet.getString("badgeid"));
+                                //Get the milliseconds as a "Long"
+                                punchResults.setOriginalTimestamp(resultSet.getLong("ts"));
+                                punchResults.setPunchTypeID(resultSet.getInt("punchtypeid"));
+                                gotResults = true;
+                                if (gotResults) {
+                                    punchResults.setID(resultSet.getInt("id"));                                    
+                                    punches.add(punchResults);
+                                } else {
+                                    System.out.println("Please input a correct ID");
+                                }
+                                
+                            }
+                        }
+
+                        //Check for more data
+                        hasResults = pstSelect.getMoreResults();
+                    }
+                }
+
+                //If the database contains the ID the user entered, then it will set the ID in the object and return
+                //the completed object
+                return punches;
+            }
+        } catch (Exception e) {
+            System.err.println(e.toString());
+        }        
+        return null;
+    }
+
 
     public void close() {
         try {
