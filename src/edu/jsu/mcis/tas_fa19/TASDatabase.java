@@ -1,7 +1,9 @@
 package edu.jsu.mcis.tas_fa19;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 public class TASDatabase {
@@ -22,7 +24,7 @@ public class TASDatabase {
     public TASDatabase() {
         try {
             //Identify the Server
-            String server = ("jdbc:mysql://localhost/tas");
+            String server = ("jdbc:mysql://localhost/tas?allowMultiQueries=true");
             String username = "db_user";
             String password = "CS488";
             System.out.println("Connecting to " + server + "...");
@@ -333,23 +335,25 @@ public class TASDatabase {
             gcBegin.setTimeInMillis(ts);
             gcEnd.setTimeInMillis(ts);
             
-            gcBegin.set(3, 00); //hours
-            gcBegin.set(4, 00); //minutes
-            gcBegin.set(5, 00); //seconds
+            gcBegin.set(Calendar.HOUR, 00); //hours
+            gcBegin.set(Calendar.MINUTE, 00); //minutes
+            gcBegin.set(Calendar.SECOND, 00); //seconds
             
-            gcEnd.set(3, 23); //hours
-            gcEnd.set(4, 59); //minutes
-            gcEnd.set(5, 59); //seconds
+            gcEnd.set(Calendar.HOUR, 23); //hours
+            gcEnd.set(Calendar.MINUTE, 59); //minutes
+            gcEnd.set(Calendar.SECOND, 59); //seconds
             
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             
 
             //Test connection
             if (conn.isValid(0)) {
 
                 //Prepare select query, this one is different, additionally it gets the timestamps as milliseconds
-                query = "SELECT * from punch where originaltimestamp BETWEEN '" + gcBegin +"' AND '" + gcEnd + "'";
+                query = "SELECT *, UNIX_TIMESTAMP(originaltimestamp) * 1000 AS ts FROM punch having ts BETWEEN '" + gcBegin.getTimeInMillis() +"' AND '" + gcEnd.getTimeInMillis() + "'";
                 pstSelect = conn.prepareStatement(query);
 
+                System.out.println(query);
                 //Execute select query
                 System.out.println("Submitting query for punch information ...");
                 hasResults = pstSelect.execute();
@@ -370,7 +374,7 @@ public class TASDatabase {
                             punchResults = new Punch();
                             //Add punch information to Punch object
                             if (resultSet.getString("badgeid").equals(badge.getId())) {
-
+                                
                                 punchResults.setTerminalID(resultSet.getInt("terminalid"));
                                 punchResults.setBadgeid(resultSet.getString("badgeid"));
                                 //Get the milliseconds as a "Long"
