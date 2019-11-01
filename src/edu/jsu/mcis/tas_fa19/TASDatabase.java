@@ -17,9 +17,13 @@ public class TASDatabase {
     ResultSet resultSet = null;
 
     String query;
+    long currentTime = System.currentTimeMillis();
+    private GregorianCalendar currentTimeStamp = new GregorianCalendar();
+    private int maxPunchid = 0;
 
     private boolean hasResults;
     private boolean gotResults = false;
+    private boolean insertComplete = false;
 
     public TASDatabase() {
         try {
@@ -156,6 +160,163 @@ public class TASDatabase {
                 } else {
                     System.out.println("Please input a correct ID");
                 }
+            }
+        } catch (Exception e) {
+            System.err.println(e.toString());
+        }
+        return null;
+    }
+
+    public int insertPunch(Punch punch) {
+        try {
+            //Test connection
+            if (conn.isValid(0)) {
+
+                //Prepare select query
+                query = "SELECT MAX(id) AS maxpunchid FROM punch";
+                pstSelect = conn.prepareStatement(query);
+
+                //Execute select query
+                System.out.println("Submitting query for max punch id ...");
+                hasResults = pstSelect.execute();
+
+                //Get results
+                System.out.println("Getting max punch id ...");
+
+                while (hasResults || pstSelect.getUpdateCount() != -1) {
+                    if (hasResults) {
+
+                        //Get ResultSet Metadata
+                        resultSet = pstSelect.getResultSet();
+
+                        System.out.println("Made it here");
+
+                        //Pull the information from the database and store it
+                        while (resultSet.first()) {
+                            //Figure out punchid
+                            System.out.println("Getting here too");
+                            maxPunchid = resultSet.getInt("maxpunchid");
+                            System.out.println(maxPunchid);
+                            insertComplete = true;
+                            break;
+                        }
+                        break;
+                    }
+                }
+
+                //Prepare select query, this one is different, additionally it gets the timestamps as milliseconds
+                query = "INSERT INTO punch (id, terminalid, badgeid, originaltimestamp, punchtypeid)" +
+                " values (?, ?, ?, ?, ?)";
+                pstSelect = conn.prepareStatement(query);
+
+                System.out.println("Submitting query for insert of punch ...");
+
+                //id
+                pstSelect.setInt(1, maxPunchid + 1);
+                punch.setID(maxPunchid + 1);
+                //terminalid
+                pstSelect.setInt(2, punch.getTerminalid());
+                //badgeid
+                pstSelect.setString(3,punch.getBadgeid());
+                //originaltimestamp
+                currentTimeStamp.setTimeInMillis(currentTime);
+                String currentTimeStampString = (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"))
+                        .format(currentTimeStamp.getTime());
+                pstSelect.setString(4, currentTimeStampString);
+                //punchtypeid
+                pstSelect.setInt(5, punch.getPunchtypeid());
+
+                //Execute Query
+                pstSelect.execute();
+
+                //If the insert of the punch was completed
+                if (insertComplete) {
+                    System.out.println(punch.getID());
+                    return punch.getID();
+                } else {
+                    System.out.println("Please input a correct ID");
+                }
+            }
+        } catch (Exception e) {
+            System.err.println(e.toString());
+        }
+        return 0;
+    }
+
+    public ArrayList<Punch> getDailyPunchList(Badge badge, long ts){
+
+        try {
+            //Create new Punch ArrayList
+            ArrayList<Punch> punches = new ArrayList();
+            GregorianCalendar gcBegin = new GregorianCalendar(); //begining of the day
+            GregorianCalendar gcEnd = new GregorianCalendar(); //end of the day
+            gcBegin.setTimeInMillis(ts);
+            gcEnd.setTimeInMillis(ts);
+
+            gcBegin.set(Calendar.HOUR, 00); //hours
+            gcBegin.set(Calendar.MINUTE, 00); //minutes
+            gcBegin.set(Calendar.SECOND, 00); //seconds
+
+            gcEnd.set(Calendar.HOUR, 23); //hours
+            gcEnd.set(Calendar.MINUTE, 59); //minutes
+            gcEnd.set(Calendar.SECOND, 59); //seconds
+
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+
+            //Test connection
+            if (conn.isValid(0)) {
+
+                //Prepare select query, this one is different, additionally it gets the timestamps as milliseconds
+                query = "SELECT *, UNIX_TIMESTAMP(originaltimestamp) * 1000 AS ts FROM punch having ts BETWEEN '" + gcBegin.getTimeInMillis() +"' AND '" + gcEnd.getTimeInMillis() + "'";
+                pstSelect = conn.prepareStatement(query);
+
+                System.out.println(query);
+                //Execute select query
+                System.out.println("Submitting query for punch information ...");
+                hasResults = pstSelect.execute();
+
+                //Get results
+                System.out.println("Getting punch information ...");
+
+                //While there is information, retrieve it
+                while (hasResults || pstSelect.getUpdateCount() != -1) {
+                    if (hasResults) {
+
+                        //Get ResultSet Metadata
+                        resultSet = pstSelect.getResultSet();
+
+                        //Pull the information from the database and store it
+                        while (resultSet.next()) {
+
+                            punchResults = new Punch();
+                            //Add punch information to Punch object
+                            if (resultSet.getString("badgeid").equals(badge.getId())) {
+
+                                punchResults.setTerminalID(resultSet.getInt("terminalid"));
+                                punchResults.setBadgeid(resultSet.getString("badgeid"));
+                                //Get the milliseconds as a "Long"
+                                punchResults.setOriginalTimestamp(resultSet.getLong("ts"));
+                                punchResults.setPunchTypeID(resultSet.getInt("punchtypeid"));
+                                gotResults = true;
+                                if (gotResults) {
+                                    punchResults.setID(resultSet.getInt("id"));
+                                    punches.add(punchResults);
+                                } else {
+                                    System.out.println("Please input a correct ID");
+                                }
+
+                            }
+                        }
+
+                        //Check for more data
+                        hasResults = pstSelect.getMoreResults();
+                    }
+                }
+
+                //If the database contains the ID the user entered, then it will set the ID in the object and return
+                //the completed object
+                return punches;
             }
         } catch (Exception e) {
             System.err.println(e.toString());
@@ -323,89 +484,6 @@ public class TASDatabase {
         }
         return null;
     }
-    
-    
-    public ArrayList<Punch> getDailyPunchList(Badge badge, long ts){
-    
-        try {
-            //Create new Punch ArrayList
-            ArrayList<Punch> punches = new ArrayList();
-            GregorianCalendar gcBegin = new GregorianCalendar(); //begining of the day
-            GregorianCalendar gcEnd = new GregorianCalendar(); //end of the day
-            gcBegin.setTimeInMillis(ts);
-            gcEnd.setTimeInMillis(ts);
-            
-            gcBegin.set(Calendar.HOUR, 00); //hours
-            gcBegin.set(Calendar.MINUTE, 00); //minutes
-            gcBegin.set(Calendar.SECOND, 00); //seconds
-            
-            gcEnd.set(Calendar.HOUR, 23); //hours
-            gcEnd.set(Calendar.MINUTE, 59); //minutes
-            gcEnd.set(Calendar.SECOND, 59); //seconds
-            
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            
-
-            //Test connection
-            if (conn.isValid(0)) {
-
-                //Prepare select query, this one is different, additionally it gets the timestamps as milliseconds
-                query = "SELECT *, UNIX_TIMESTAMP(originaltimestamp) * 1000 AS ts FROM punch having ts BETWEEN '" + gcBegin.getTimeInMillis() +"' AND '" + gcEnd.getTimeInMillis() + "'";
-                pstSelect = conn.prepareStatement(query);
-
-                System.out.println(query);
-                //Execute select query
-                System.out.println("Submitting query for punch information ...");
-                hasResults = pstSelect.execute();
-
-                //Get results
-                System.out.println("Getting punch information ...");
-
-                //While there is information, retrieve it
-                while (hasResults || pstSelect.getUpdateCount() != -1) {
-                    if (hasResults) {
-
-                        //Get ResultSet Metadata
-                        resultSet = pstSelect.getResultSet();
-
-                        //Pull the information from the database and store it
-                        while (resultSet.next()) {
-                            
-                            punchResults = new Punch();
-                            //Add punch information to Punch object
-                            if (resultSet.getString("badgeid").equals(badge.getId())) {
-                                
-                                punchResults.setTerminalID(resultSet.getInt("terminalid"));
-                                punchResults.setBadgeid(resultSet.getString("badgeid"));
-                                //Get the milliseconds as a "Long"
-                                punchResults.setOriginalTimestamp(resultSet.getLong("ts"));
-                                punchResults.setPunchTypeID(resultSet.getInt("punchtypeid"));
-                                gotResults = true;
-                                if (gotResults) {
-                                    punchResults.setID(resultSet.getInt("id"));                                    
-                                    punches.add(punchResults);
-                                } else {
-                                    System.out.println("Please input a correct ID");
-                                }
-                                
-                            }
-                        }
-
-                        //Check for more data
-                        hasResults = pstSelect.getMoreResults();
-                    }
-                }
-
-                //If the database contains the ID the user entered, then it will set the ID in the object and return
-                //the completed object
-                return punches;
-            }
-        } catch (Exception e) {
-            System.err.println(e.toString());
-        }        
-        return null;
-    }
-
 
     public void close() {
         try {

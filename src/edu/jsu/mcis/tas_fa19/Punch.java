@@ -20,11 +20,17 @@ public class Punch {
 
     //Changed "Badge" to "String" type
     //Added "int id" to beginning of argument
-    public Punch(Badge badge, int terminalid, int punchtypeid) {
-        this.id = 0;
+    public Punch(int id, String badgeid, int terminalid, int punchtypeid) {
+        this.id = id;
         this.punchtypeid = punchtypeid;
         this.terminalid = terminalid;
+        this.badgeid = badgeid;
+    }
+
+    public Punch(Badge badge, int terminal, int punchtype) {
         this.badgeid = badge.getId();
+        this.terminalid = terminal;
+        this.punchtypeid = punchtype;
     }
 
     public void setOriginalTimestamp(long ts)//a punch pulled from sql
@@ -50,7 +56,7 @@ public class Punch {
         output.append(" ");
 
         SimpleDateFormat sdf = new SimpleDateFormat("EEE MM/dd/yyyy HH:mm:ss");
-        output.append(sdf.format(gc.getTime()).toUpperCase());
+        output.append(sdf.format(getOriginaltimestamp().getTime()).toUpperCase());
 
         return output.toString();
     }
@@ -73,8 +79,8 @@ public class Punch {
         return id;
     }
 
-    public long getOriginaltimestamp() {
-        return originalTimeStamp;
+    public GregorianCalendar getOriginaltimestamp() {
+        return gc;
     }
 
     //Changed "String" to "int"
