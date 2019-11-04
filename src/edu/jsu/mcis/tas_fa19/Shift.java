@@ -131,6 +131,7 @@ public class Shift {
         return this.lunchduration = Duration.between(lunchstart, lunchstop).toMinutes();
     }
 
+
     @Override
     public String toString()
     {
