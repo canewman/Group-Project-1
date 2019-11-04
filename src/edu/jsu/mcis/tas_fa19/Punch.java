@@ -56,7 +56,7 @@ public class Punch {
         output.append(" ");
 
         SimpleDateFormat sdf = new SimpleDateFormat("EEE MM/dd/yyyy HH:mm:ss");
-        output.append(sdf.format(getOriginaltimestamp().getTime()).toUpperCase());
+        output.append(sdf.format(gc.getTime()).toUpperCase());
 
         return output.toString();
     }
@@ -79,8 +79,8 @@ public class Punch {
         return id;
     }
 
-    public GregorianCalendar getOriginaltimestamp() {
-        return gc;
+    public long getOriginaltimestamp() {
+        return originalTimeStamp;
     }
 
     //Changed "String" to "int"
