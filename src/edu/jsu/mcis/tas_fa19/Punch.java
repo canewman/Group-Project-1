@@ -3,14 +3,12 @@ package edu.jsu.mcis.tas_fa19;
 import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
 
-public class Punch {
-    //Changed this from "String" to "int" considering Feature1.java tests the Punch object with an integer for "id"
+public class Punch {    
     private int id;
     private int punchtypeid;
     private int terminalid;
-    //Changed this from "Badge" to "String" because its not the full object, its just a string that shows the badge ID
     private String badgeid;
-
+    private String adjustedtimestamp;
     private long originalTimeStamp;
     private GregorianCalendar gc = new GregorianCalendar();
 
@@ -99,5 +97,13 @@ public class Punch {
     //Changed from "Badge" to "String"
     public void setBadgeid(String badgeid) {
         this.badgeid = badgeid;
+    }
+    
+    public void adjust(Shift s){
+    
+    }
+    
+    public String printAdjustedTimestamp(){        
+        return this.adjustedtimestamp;
     }
 }
