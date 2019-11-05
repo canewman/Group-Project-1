@@ -253,11 +253,11 @@ public class TASDatabase {
             gcBegin.setTimeInMillis(ts);
             gcEnd.setTimeInMillis(ts);
 
-            gcBegin.set(Calendar.HOUR, 00); //hours
+            gcBegin.set(Calendar.HOUR_OF_DAY, 00); //hours
             gcBegin.set(Calendar.MINUTE, 00); //minutes
             gcBegin.set(Calendar.SECOND, 00); //seconds
 
-            gcEnd.set(Calendar.HOUR, 23); //hours
+            gcEnd.set(Calendar.HOUR_OF_DAY, 23); //hours
             gcEnd.set(Calendar.MINUTE, 59); //minutes
             gcEnd.set(Calendar.SECOND, 59); //seconds
 
@@ -268,7 +268,7 @@ public class TASDatabase {
             if (conn.isValid(0)) {
 
                 //Prepare select query, this one is different, additionally it gets the timestamps as milliseconds
-                query = "SELECT *, UNIX_TIMESTAMP(originaltimestamp) * 1000 AS ts FROM punch having ts BETWEEN '" + gcBegin.getTimeInMillis() +"' AND '" + gcEnd.getTimeInMillis() + "'";
+                query = "SELECT *, UNIX_TIMESTAMP(originaltimestamp) * 1000 AS ts FROM punch having ts BETWEEN '" + gcBegin.getTimeInMillis() +"' AND '" + gcEnd.getTimeInMillis() + "' ORDER BY originaltimestamp";
                 pstSelect = conn.prepareStatement(query);
 
                 System.out.println(query);
