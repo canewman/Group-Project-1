@@ -12,7 +12,7 @@ public class Punch {
     private int punchtypeid;
     private int terminalid;
     private String badgeid;
-    private String adjustedtimestamp;
+    private GregorianCalendar adjustedtimestamp = new GregorianCalendar();
     private String adjustmenttype;
     private long originalTimeStamp;
     private GregorianCalendar gc = new GregorianCalendar();
@@ -107,17 +107,17 @@ public class Punch {
     public void adjust(Shift s){
 
             LocalTime gcLocalTime = LocalTime.of((int)gc.get(Calendar.HOUR_OF_DAY), (int)gc.get(Calendar.MINUTE));
-
-            long shiftMinutesStart = s.getStart().toSecondOfDay() / (60);  
-            long shiftMinutesStop = s.getStop().toSecondOfDay() / (60);
-            long punchMinutes = ((gc.get(Calendar.HOUR_OF_DAY) * 60) + (gc.get(Calendar.MINUTE)) + (gc.get(Calendar.SECOND) / 60));     
+            adjustedtimestamp.setTimeInMillis(gc.getTimeInMillis());
+            adjustmenttype = "None";
+            
+            int shiftinterval = s.getInterval();
 
             LocalTime startGraceTime = s.getStart().plusMinutes(s.getGracePeriod());
             LocalTime startIntervalTime = s.getStart().minusMinutes(s.getInterval());
             LocalTime startDockTime = s.getStart().plusMinutes(s.getDock());
 
             LocalTime stopGraceTime = s.getStop().plusMinutes(s.getGracePeriod());
-            LocalTime stopIntervalTime = s.getStop().minusMinutes(s.getInterval());
+            LocalTime stopIntervalTime = s.getStop().plusMinutes(s.getInterval());
             LocalTime stopDockTime = s.getStop().plusMinutes(s.getDock());
 
             LocalTime lunchStart = s.getLunchStart();
@@ -135,11 +135,11 @@ public class Punch {
             gcLocalTime = startDockTime;
             this.adjustmenttype = "Shift Dock";
             }
-            else if(punchtypeid == 1 && gcLocalTime.isAfter(lunchStart) && gcLocalTime.isBefore(lunchStop)){//start lunch
+            else if(punchtypeid == 0 && gcLocalTime.isAfter(lunchStart) && gcLocalTime.isBefore(lunchStop)){//start lunch
             gcLocalTime = s.getLunchStart();
             this.adjustmenttype = "Lunch Start";
             }
-            else if(punchtypeid == 0 && gcLocalTime.isAfter(lunchStart) && gcLocalTime.isBefore(lunchStop)){//stop lunch
+            else if(punchtypeid == 1 && gcLocalTime.isAfter(lunchStart) && gcLocalTime.isBefore(lunchStop)){//stop lunch
             gcLocalTime = s.getLunchStop();
             this.adjustmenttype = "Lunch Stop";
             }
@@ -155,12 +155,34 @@ public class Punch {
             gcLocalTime = s.getStop();
             this.adjustmenttype = "Shift Stop";
             }
+            
+            adjustedtimestamp.set(Calendar.HOUR_OF_DAY, gcLocalTime.get(ChronoField.HOUR_OF_DAY));
+            adjustedtimestamp.set(Calendar.MINUTE, gcLocalTime.get(ChronoField.MINUTE_OF_HOUR));
+            adjustedtimestamp.set(Calendar.SECOND, gcLocalTime.get(ChronoField.SECOND_OF_MINUTE));
+            
+            int originalminute = adjustedtimestamp.get(Calendar.MINUTE);
+            int adjustedminute;
+            
+            if(originalminute % shiftinterval != 0){
+                if((originalminute % shiftinterval) < (shiftinterval / 2))
+                    adjustedminute = (Math.round(originalminute / shiftinterval) * shiftinterval);
+                else{
+                    adjustedminute = (Math.round(originalminute / shiftinterval) * shiftinterval) + shiftinterval;
+                }
+                adjustedtimestamp.set(Calendar.MINUTE, (adjustedminute - originalminute));
+                adjustedtimestamp.set(Calendar.SECOND, 00);
+                
+            }            
 
-            gc.set(Calendar.HOUR_OF_DAY, gcLocalTime.get(ChronoField.HOUR_OF_DAY));
-            gc.set(Calendar.MINUTE, gcLocalTime.get(ChronoField.MINUTE_OF_HOUR));
-            gc.set(Calendar.SECOND, gcLocalTime.get(ChronoField.SECOND_OF_MINUTE));
-
-            StringBuilder output = new StringBuilder("#");
+            
+            
+           
+        }
+    
+    
+    public String printAdjustedTimestamp(){ 
+        
+        StringBuilder output = new StringBuilder("#");
             output.append(badgeid); // No ".toString()" method needed here since its now a String
 
             switch (punchtypeid) {
@@ -177,14 +199,9 @@ public class Punch {
             output.append(" ");
 
             SimpleDateFormat sdf = new SimpleDateFormat("EEE MM/dd/yyyy HH:mm:ss");
-            output.append(sdf.format(gc.getTime()).toUpperCase());
-            output.append(this.adjustmenttype);
+            output.append(sdf.format(adjustedtimestamp.getTime()).toUpperCase());
+            output.append( " (" + this.adjustmenttype + ")");
             
-            this.adjustedtimestamp = output.toString();
-        }
-    
-    
-    public String printAdjustedTimestamp(){        
-        return this.adjustedtimestamp;
+            return output.toString();
     }
 }
