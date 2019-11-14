@@ -108,6 +108,7 @@ public class Punch {
 
             LocalTime gcLocalTime = LocalTime.of((int)gc.get(Calendar.HOUR_OF_DAY), (int)gc.get(Calendar.MINUTE));
             adjustedtimestamp.setTimeInMillis(gc.getTimeInMillis());
+            int dayOfWeek = adjustedtimestamp.get(Calendar.DAY_OF_WEEK);
             adjustmenttype = "None";
             
             int shiftinterval = s.getInterval();
@@ -127,27 +128,27 @@ public class Punch {
             gcLocalTime = s.getStart();
             this.adjustmenttype = "Shift Start";
             }
-            else if(gcLocalTime.isAfter(s.getStart()) && gcLocalTime.isBefore(startGraceTime)){//start grace period
+            else if(dayOfWeek != Calendar.SATURDAY && dayOfWeek != Calendar.SUNDAY && gcLocalTime.isAfter(s.getStart()) && gcLocalTime.isBefore(startGraceTime)){//start grace period
             gcLocalTime = s.getStart();
             this.adjustmenttype = "Shift Start";
             }
-            else if(gcLocalTime.isAfter(startGraceTime) && gcLocalTime.isBefore(startDockTime)){//start dock period
+            else if(dayOfWeek != Calendar.SATURDAY && dayOfWeek != Calendar.SUNDAY && gcLocalTime.isAfter(startGraceTime) && gcLocalTime.isBefore(startDockTime)){//start dock period
             gcLocalTime = startDockTime;
             this.adjustmenttype = "Shift Dock";
             }
-            else if(punchtypeid == 0 && gcLocalTime.isAfter(lunchStart) && gcLocalTime.isBefore(lunchStop)){//start lunch
+            else if(dayOfWeek != Calendar.SATURDAY && dayOfWeek != Calendar.SUNDAY && punchtypeid == 0 && gcLocalTime.isAfter(lunchStart) && gcLocalTime.isBefore(lunchStop)){//start lunch
             gcLocalTime = s.getLunchStart();
             this.adjustmenttype = "Lunch Start";
             }
-            else if(punchtypeid == 1 && gcLocalTime.isAfter(lunchStart) && gcLocalTime.isBefore(lunchStop)){//stop lunch
+            else if(dayOfWeek != Calendar.SATURDAY && dayOfWeek != Calendar.SUNDAY && punchtypeid == 1 && gcLocalTime.isAfter(lunchStart) && gcLocalTime.isBefore(lunchStop)){//stop lunch
             gcLocalTime = s.getLunchStop();
             this.adjustmenttype = "Lunch Stop";
             }
-            else if(gcLocalTime.isAfter(stopDockTime) && gcLocalTime.isBefore(stopGraceTime)){//stop dock period
+            else if(dayOfWeek != Calendar.SATURDAY && dayOfWeek != Calendar.SUNDAY && gcLocalTime.isAfter(stopDockTime) && gcLocalTime.isBefore(stopGraceTime)){//stop dock period
             gcLocalTime = stopDockTime;
             this.adjustmenttype = "Shift Dock";
             }
-            else if(gcLocalTime.isAfter(stopGraceTime) && gcLocalTime.isBefore(s.getStop())){//stop grace period
+            else if(dayOfWeek != Calendar.SATURDAY && dayOfWeek != Calendar.SUNDAY && gcLocalTime.isAfter(stopGraceTime) && gcLocalTime.isBefore(s.getStop())){//stop grace period
             gcLocalTime = s.getStop();
             this.adjustmenttype = "Shift Stop";
             }
@@ -155,10 +156,28 @@ public class Punch {
             gcLocalTime = s.getStop();
             this.adjustmenttype = "Shift Stop";
             }
-            
             adjustedtimestamp.set(Calendar.HOUR_OF_DAY, gcLocalTime.get(ChronoField.HOUR_OF_DAY));
             adjustedtimestamp.set(Calendar.MINUTE, gcLocalTime.get(ChronoField.MINUTE_OF_HOUR));
             adjustedtimestamp.set(Calendar.SECOND, gcLocalTime.get(ChronoField.SECOND_OF_MINUTE));
+            
+            if(dayOfWeek == Calendar.SUNDAY || dayOfWeek == Calendar.SATURDAY){//rounding up
+                if(gc.get(Calendar.MINUTE) % s.getInterval() >= s.getInterval() / 2){
+                    
+                    while(adjustedtimestamp.get(Calendar.MINUTE) != 0){
+                        adjustedtimestamp.add(Calendar.MINUTE, 1);
+                    }           
+                    
+                    adjustedtimestamp.set(Calendar.SECOND, 0);
+                }
+                else{//rounding down               
+                adjustedtimestamp.set(Calendar.MINUTE, adjustedtimestamp.get(Calendar.MINUTE) - gc.get(Calendar.MINUTE) % s.getInterval());
+                adjustedtimestamp.set(Calendar.SECOND, 0);
+                }
+                
+                this.adjustmenttype = "Interval Round";             
+                
+            }
+          
             
             int originalminute = adjustedtimestamp.get(Calendar.MINUTE);
             int adjustedminute;
