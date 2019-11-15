@@ -18,8 +18,6 @@ public class Shift {
     private LocalTime lunchstop;
     private int lunchdeduct;
     private long lunchduration;
-    //needed at a later point
-    private String adjustmenttype;
     private LocalTime hms; //hours minutes seconds
 
     public Shift() {
@@ -78,8 +76,8 @@ public class Shift {
     }
 
     public void setInterval(int interval) {
-        this.interval = interval;
-    }
+        this.interval = interval;}
+    
 
     public int getGracePeriod() {
         return graceperiod;
