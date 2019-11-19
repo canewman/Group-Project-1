@@ -106,12 +106,9 @@ public class Punch {
         this.badgeid = badgeid;
     }
     
-    public void adjust(Shift s){
-            //System.out.println(adjustedtimestamp.getTimeInMillis());
-            //LocalTime gcLocalTime = LocalTime.of((int)gc.get(Calendar.HOUR_OF_DAY), (int)gc.get(Calendar.MINUTE));
+    public void adjust(Shift s){        
             adjustedtimestamp.setTimeInMillis(gc.getTimeInMillis());            
             adjustmenttype = "";
-            //            System.out.println(adjustedtimestamp.getTimeInMillis());
 
             int dayOfWeek = adjustedtimestamp.get(Calendar.DAY_OF_WEEK);
             int shiftinterval = s.getInterval();//in minutes
@@ -119,10 +116,10 @@ public class Punch {
             //getting start of shift parameters in milliseconds
             int startHour = s.getStart().getHour();
             int startMinute = s.getStart().getMinute();
-            long interval = s.getInterval() * 60000;
-            long grace = s.getGracePeriod() * 60000;
-            long dock = s.getDock() * 60000;
             
+            long intervalMill = s.getInterval() * 60000;
+            long graceMill = s.getGracePeriod() * 60000;
+            long dockMill = s.getDock() * 60000;            
             
             //shift start
             GregorianCalendar start = new GregorianCalendar();
@@ -131,34 +128,15 @@ public class Punch {
             start.set(Calendar.MINUTE, startMinute);
             start.set(Calendar.SECOND, 0);
                    
-            //System.out.println(start.getTimeInMillis());
             
             long shiftStart = start.getTimeInMillis();
-            long startInterval = shiftStart - interval;//parentheses converts the 15 minute interval to mill
-            long startGrace = shiftStart + grace;//parentheses converts the 5 minute grace period to mill
-            long startDock = shiftStart + dock;//parentheses converts the 15 minute dock to mill
-            
-            //lunch start
-            GregorianCalendar lunchstart = new GregorianCalendar();
-            lunchstart.setTimeInMillis(shiftStart);//sets lunch to the punch day
-            lunchstart.set(Calendar.HOUR, s.getLunchStart().getHour());
-            lunchstart.set(Calendar.MINUTE, s.getLunchStart().getMinute());
-            lunchstart.set(Calendar.SECOND, 0);
-            
-            long lunchStart = lunchstart.getTimeInMillis();
-            
-            //lunch stop
-            GregorianCalendar lunchstop = new GregorianCalendar();
-            lunchstop.setTimeInMillis(shiftStart);//sets lunch to the punch day
-            lunchstop.set(Calendar.HOUR, s.getLunchStop().getHour());
-            lunchstop.set(Calendar.MINUTE, s.getLunchStop().getMinute());
-            lunchstop.set(Calendar.SECOND, 0);
-            
-            long lunchStop = lunchstop.getTimeInMillis();
+            long startInterval = shiftStart - intervalMill;//parentheses converts the 15 minute interval to mill
+            long startGrace = shiftStart + graceMill;//parentheses converts the 5 minute grace period to mill
+            long startDock = shiftStart + dockMill;//parentheses converts the 15 minute dock to mill
             
             //getting end of shift parameters in mill
             int stopHour = s.getStop().getHour();
-            int stopMinute = s.getStop().getMinute();
+            int stopMinute = s.getStop().getMinute(); 
             
             //Shift stop
             GregorianCalendar stop = new GregorianCalendar();
@@ -168,65 +146,84 @@ public class Punch {
             stop.set(Calendar.SECOND, 0);              
             
             long shiftStop = stop.getTimeInMillis();
-            long stopInterval = shiftStop + interval;
-            long stopGrace = shiftStop - grace;
-            long stopDock = shiftStop - dock;
+            long stopInterval = shiftStop + intervalMill;
+            long stopGrace = shiftStop - graceMill;
+            long stopDock = shiftStop - dockMill;
             
-            switch(s.getID()){
+            //lunch start
+            GregorianCalendar lunchstart = new GregorianCalendar();
+            lunchstart.setTimeInMillis(shiftStart);//sets lunch to the punch day
+            lunchstart.set(Calendar.HOUR_OF_DAY, s.getLunchStart().getHour());
+            lunchstart.set(Calendar.MINUTE, s.getLunchStart().getMinute());
+            lunchstart.set(Calendar.SECOND, 0);
+            
+            long lunchStart = lunchstart.getTimeInMillis();
+            
+            //lunch stop
+            GregorianCalendar lunchstop = new GregorianCalendar();
+            lunchstop.setTimeInMillis(shiftStart);//sets lunch to the punch day
+            lunchstop.set(Calendar.HOUR_OF_DAY, s.getLunchStop().getHour());
+            lunchstop.set(Calendar.MINUTE, s.getLunchStop().getMinute());
+            lunchstop.set(Calendar.SECOND, 0);
+            
+            long lunchStop = lunchstop.getTimeInMillis();               
+            
+            switch(this.punchtypeid){
             
                 case 0://clock out
                     if((originalTimeStamp >= lunchStart) && (originalTimeStamp <= lunchStop)){//start of lunch
                         this.adjustmenttype = "Lunch Start";
                         this.adjustedTimeStampInMill = lunchStart;
-                    //    System.out.println(lunchStart);
+                        this.adjustedtimestamp.setTimeInMillis(adjustedTimeStampInMill);
                     }
                     else if((originalTimeStamp < stopGrace) && (originalTimeStamp >= stopDock)){//stop dock
                         this.adjustmenttype = "Shift Dock";
                         this.adjustedTimeStampInMill = stopDock;
-                    //                            System.out.println(stopDock);
-
+                        this.adjustedtimestamp.setTimeInMillis(adjustedTimeStampInMill);
                     }
                     else if((originalTimeStamp >= stopGrace) && (originalTimeStamp <= shiftStop)){//stop grace
                         this.adjustmenttype = "Shift Stop";
-                        this.adjustedTimeStampInMill = shiftStop;   
-                    //                            System.out.println(stopGrace);
-
+                        this.adjustedTimeStampInMill = shiftStop; 
+                        this.adjustedtimestamp.setTimeInMillis(adjustedTimeStampInMill);
                     }
                     else if((originalTimeStamp >= shiftStop) && (originalTimeStamp <= stopInterval)){//stop interval
                         this.adjustmenttype = "Shift Stop";
                         this.adjustedTimeStampInMill = shiftStop;
-                    //                            System.out.println(stopInterval);
-
+                        this.adjustedtimestamp.setTimeInMillis(adjustedTimeStampInMill);
                     }  
-                    //System.out.println("case 1 " + adjustedTimeStampInMill);
-                    this.adjustedtimestamp.setTimeInMillis(adjustedTimeStampInMill);
+                    else{
+                        this.adjustedtimestamp.setTimeInMillis(gc.getTimeInMillis());
+                        this.adjustmenttype = "None";
+                        this.adjustedtimestamp.set(Calendar.SECOND, 0);
+                    }
                     break;
                 case 1://clock in
                     
                     if((originalTimeStamp >= startInterval) && (originalTimeStamp <= shiftStart)){//start interval
                         this.adjustmenttype = "Shift Start";
-                        this.adjustedTimeStampInMill = shiftStart;   
-                        System.out.println("Start Interval");
+                        this.adjustedTimeStampInMill = shiftStart; 
+                        this.adjustedtimestamp.setTimeInMillis(adjustedTimeStampInMill);
                     }
                     else if((originalTimeStamp >= shiftStart) && (originalTimeStamp <= startGrace)){////start grace
                         this.adjustmenttype = "Shift Start";
                         this.adjustedTimeStampInMill = shiftStart;
-                        System.out.println("start grace");
+                        this.adjustedtimestamp.setTimeInMillis(adjustedTimeStampInMill);
                     }
                     else if((originalTimeStamp > startGrace) && (originalTimeStamp <= startDock)){//start dock
                         this.adjustmenttype = "Shift Dock";
                         this.adjustedTimeStampInMill = startDock;
-                        System.out.println("Shift Dock");
+                        this.adjustedtimestamp.setTimeInMillis(adjustedTimeStampInMill);
                     }
                     else if((originalTimeStamp >= lunchStart) && (originalTimeStamp <= lunchStop)){//start lunch
                         this.adjustmenttype = "Lunch Stop";
                         this.adjustedTimeStampInMill = lunchStop;
-                        System.out.println("lunch stop");
-                        System.out.println(lunchStop);
+                        this.adjustedtimestamp.setTimeInMillis(adjustedTimeStampInMill);                      
+                    }   
+                    else{
+                        this.adjustedtimestamp.setTimeInMillis(gc.getTimeInMillis());
+                        this.adjustmenttype = "None";
+                        this.adjustedtimestamp.set(Calendar.SECOND, 0);
                     }
-                    
-                    //System.out.println("case 2" + adjustedTimeStampInMill);
-                    this.adjustedtimestamp.setTimeInMillis(adjustedTimeStampInMill);
                     break;
             }            
             
@@ -246,31 +243,7 @@ public class Punch {
                 }                
                 adjustedtimestamp.set(Calendar.SECOND, 0);
                 this.adjustmenttype = "Interval Round";            
-            }
-          
-            
-            //int originalminute = adjustedtimestamp.get(Calendar.MINUTE);
-            //int adjustedminute;
-            /*
-            if(originalminute % shiftinterval != 0){
-                if((originalminute % shiftinterval) < (shiftinterval / 2)){//rounding down
-                    adjustedminute = (Math.round(originalminute / shiftinterval) * shiftinterval);
-                    //System.out.println("rounding down");
-                }
-                else{//rounding up
-                    adjustedminute = (Math.round(originalminute / shiftinterval) * shiftinterval) + shiftinterval;
-                    //System.out.println("rounding up");
-                }
-                adjustedtimestamp.set(Calendar.MINUTE, (adjustedminute - originalminute));
-                adjustedtimestamp.set(Calendar.SECOND, 00);
-                adjustmenttype = "Interval Round";
-                System.out.println("Entered snellens code");
-                
             }            
-            */
-            
-            
-           
         }
     
     
