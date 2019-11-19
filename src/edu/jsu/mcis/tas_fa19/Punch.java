@@ -228,40 +228,38 @@ public class Punch {
                     //System.out.println("case 2" + adjustedTimeStampInMill);
                     this.adjustedtimestamp.setTimeInMillis(adjustedTimeStampInMill);
                     break;
-            }
+            }            
             
-            if(dayOfWeek == Calendar.SUNDAY || dayOfWeek == Calendar.SATURDAY){//rounding up
-                if(gc.get(Calendar.MINUTE) % s.getInterval() >= s.getInterval() / 2){
-                    
-                    adjustedtimestamp.set(Calendar.MINUTE, gc.get(Calendar.MINUTE) + (gc.get(Calendar.MINUTE) % s.getInterval()));                    
-                    adjustedtimestamp.set(Calendar.SECOND, 0);
-                    System.out.println(adjustedtimestamp.getTimeInMillis());
-                    System.out.println("Rounding up");
+            if(((adjustedtimestamp.get(Calendar.MINUTE) % shiftinterval) != 0) ||
+                    (dayOfWeek == Calendar.SUNDAY || dayOfWeek == Calendar.SATURDAY)){
+                adjustedtimestamp.setTimeInMillis(gc.getTimeInMillis());
+                
+                if(gc.get(Calendar.MINUTE) % s.getInterval() >= s.getInterval() / 2){ //rounding up               
+                    while((adjustedtimestamp.get(Calendar.MINUTE) % shiftinterval) != 0){
+                        adjustedtimestamp.add(Calendar.MINUTE, 1);
+                    }                    
                 }
-                else{//rounding down               
-                adjustedtimestamp.set(Calendar.MINUTE, adjustedtimestamp.get(Calendar.MINUTE) - gc.get(Calendar.MINUTE) % s.getInterval());
+                else{//rounding down                        
+                    while((adjustedtimestamp.get(Calendar.MINUTE) % shiftinterval) != 0){
+                            adjustedtimestamp.add(Calendar.MINUTE, -1);
+                    }
+                }                
                 adjustedtimestamp.set(Calendar.SECOND, 0);
-                System.out.println(adjustedtimestamp.getTimeInMillis());
-                System.out.println("rounding down");
-                }
-                
-                this.adjustmenttype = "Interval Round";             
-                System.out.println("entered my weekend code");
-                
+                this.adjustmenttype = "Interval Round";            
             }
           
             
-            int originalminute = adjustedtimestamp.get(Calendar.MINUTE);
-            int adjustedminute;
-            
+            //int originalminute = adjustedtimestamp.get(Calendar.MINUTE);
+            //int adjustedminute;
+            /*
             if(originalminute % shiftinterval != 0){
                 if((originalminute % shiftinterval) < (shiftinterval / 2)){//rounding down
                     adjustedminute = (Math.round(originalminute / shiftinterval) * shiftinterval);
-                    System.out.println("rounding down");
+                    //System.out.println("rounding down");
                 }
                 else{//rounding up
                     adjustedminute = (Math.round(originalminute / shiftinterval) * shiftinterval) + shiftinterval;
-                    System.out.println("rounding up");
+                    //System.out.println("rounding up");
                 }
                 adjustedtimestamp.set(Calendar.MINUTE, (adjustedminute - originalminute));
                 adjustedtimestamp.set(Calendar.SECOND, 00);
@@ -269,7 +267,7 @@ public class Punch {
                 System.out.println("Entered snellens code");
                 
             }            
-            
+            */
             
             
            
