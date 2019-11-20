@@ -204,9 +204,10 @@ public class Punch {
                 this.adjustmenttype = "Interval Round";            
             }            
         }
+    
     public HashMap<String, Long> getShiftTimes(Shift s){
         
-        int startHour = s.getStart().getHour();
+            int startHour = s.getStart().getHour();
             int startMinute = s.getStart().getMinute();
             
             long intervalMill = s.getInterval() * 60000;
@@ -302,5 +303,9 @@ public class Punch {
     
     public long getAdjustedTimeStamp(){
         return this.adjustedtimestamp.getTimeInMillis();
+    }
+    
+    public String getAdjustmentType(){
+        return this.adjustmenttype;
     }
 }
