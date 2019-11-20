@@ -6,6 +6,7 @@ import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 
 public class Punch {    
     private int id;
@@ -112,61 +113,19 @@ public class Punch {
 
             int dayOfWeek = adjustedtimestamp.get(Calendar.DAY_OF_WEEK);
             int shiftinterval = s.getInterval();//in minutes
-
-            //getting start of shift parameters in milliseconds
-            int startHour = s.getStart().getHour();
-            int startMinute = s.getStart().getMinute();
             
-            long intervalMill = s.getInterval() * 60000;
-            long graceMill = s.getGracePeriod() * 60000;
-            long dockMill = s.getDock() * 60000;            
+            HashMap<String, Long> values = getShiftTimes(s);
             
-            //shift start
-            GregorianCalendar start = new GregorianCalendar();
-            start.setTimeInMillis(gc.getTimeInMillis());
-            start.set(Calendar.HOUR_OF_DAY, startHour);
-            start.set(Calendar.MINUTE, startMinute);
-            start.set(Calendar.SECOND, 0);
-                   
-            
-            long shiftStart = start.getTimeInMillis();
-            long startInterval = shiftStart - intervalMill;//parentheses converts the 15 minute interval to mill
-            long startGrace = shiftStart + graceMill;//parentheses converts the 5 minute grace period to mill
-            long startDock = shiftStart + dockMill;//parentheses converts the 15 minute dock to mill
-            
-            //getting end of shift parameters in mill
-            int stopHour = s.getStop().getHour();
-            int stopMinute = s.getStop().getMinute(); 
-            
-            //Shift stop
-            GregorianCalendar stop = new GregorianCalendar();
-            stop.setTimeInMillis(shiftStart);//set stop shift to punch day
-            stop.set(Calendar.HOUR_OF_DAY, stopHour);
-            stop.set(Calendar.MINUTE, stopMinute);
-            stop.set(Calendar.SECOND, 0);              
-            
-            long shiftStop = stop.getTimeInMillis();
-            long stopInterval = shiftStop + intervalMill;
-            long stopGrace = shiftStop - graceMill;
-            long stopDock = shiftStop - dockMill;
-            
-            //lunch start
-            GregorianCalendar lunchstart = new GregorianCalendar();
-            lunchstart.setTimeInMillis(shiftStart);//sets lunch to the punch day
-            lunchstart.set(Calendar.HOUR_OF_DAY, s.getLunchStart().getHour());
-            lunchstart.set(Calendar.MINUTE, s.getLunchStart().getMinute());
-            lunchstart.set(Calendar.SECOND, 0);
-            
-            long lunchStart = lunchstart.getTimeInMillis();
-            
-            //lunch stop
-            GregorianCalendar lunchstop = new GregorianCalendar();
-            lunchstop.setTimeInMillis(shiftStart);//sets lunch to the punch day
-            lunchstop.set(Calendar.HOUR_OF_DAY, s.getLunchStop().getHour());
-            lunchstop.set(Calendar.MINUTE, s.getLunchStop().getMinute());
-            lunchstop.set(Calendar.SECOND, 0);
-            
-            long lunchStop = lunchstop.getTimeInMillis();               
+            long shiftStart = values.get("shiftStart");
+            long shiftStop = values.get("shiftStop");
+            long lunchStart = values.get("lunchStart");
+            long lunchStop = values.get("lunchStop");
+            long startGrace = values.get("startGrace");
+            long stopGrace = values.get("stopGrace");
+            long startDock = values.get("startDock");
+            long stopDock = values.get("stopDock");
+            long startInterval = values.get("startInterval");
+            long stopInterval = values.get("stopInterval");
             
             switch(this.punchtypeid){
             
@@ -245,7 +204,76 @@ public class Punch {
                 this.adjustmenttype = "Interval Round";            
             }            
         }
-    
+    public HashMap<String, Long> getShiftTimes(Shift s){
+        
+        int startHour = s.getStart().getHour();
+            int startMinute = s.getStart().getMinute();
+            
+            long intervalMill = s.getInterval() * 60000;
+            long graceMill = s.getGracePeriod() * 60000;
+            long dockMill = s.getDock() * 60000;            
+            
+            //shift start
+            GregorianCalendar start = new GregorianCalendar();
+            start.setTimeInMillis(gc.getTimeInMillis());
+            start.set(Calendar.HOUR_OF_DAY, startHour);
+            start.set(Calendar.MINUTE, startMinute);
+            start.set(Calendar.SECOND, 0);
+                   
+            
+            long shiftStart = start.getTimeInMillis();
+            long startInterval = shiftStart - intervalMill;//parentheses converts the 15 minute interval to mill
+            long startGrace = shiftStart + graceMill;//parentheses converts the 5 minute grace period to mill
+            long startDock = shiftStart + dockMill;//parentheses converts the 15 minute dock to mill
+            
+            //getting end of shift parameters in mill
+            int stopHour = s.getStop().getHour();
+            int stopMinute = s.getStop().getMinute(); 
+            
+            //Shift stop
+            GregorianCalendar stop = new GregorianCalendar();
+            stop.setTimeInMillis(shiftStart);//set stop shift to punch day
+            stop.set(Calendar.HOUR_OF_DAY, stopHour);
+            stop.set(Calendar.MINUTE, stopMinute);
+            stop.set(Calendar.SECOND, 0);              
+            
+            long shiftStop = stop.getTimeInMillis();
+            long stopInterval = shiftStop + intervalMill;
+            long stopGrace = shiftStop - graceMill;
+            long stopDock = shiftStop - dockMill;
+            
+            //lunch start
+            GregorianCalendar lunchstart = new GregorianCalendar();
+            lunchstart.setTimeInMillis(shiftStart);//sets lunch to the punch day
+            lunchstart.set(Calendar.HOUR_OF_DAY, s.getLunchStart().getHour());
+            lunchstart.set(Calendar.MINUTE, s.getLunchStart().getMinute());
+            lunchstart.set(Calendar.SECOND, 0);
+            
+            long lunchStart = lunchstart.getTimeInMillis();
+            
+            //lunch stop
+            GregorianCalendar lunchstop = new GregorianCalendar();
+            lunchstop.setTimeInMillis(shiftStart);//sets lunch to the punch day
+            lunchstop.set(Calendar.HOUR_OF_DAY, s.getLunchStop().getHour());
+            lunchstop.set(Calendar.MINUTE, s.getLunchStop().getMinute());
+            lunchstop.set(Calendar.SECOND, 0);
+            
+            long lunchStop = lunchstop.getTimeInMillis();
+            
+            HashMap<String, Long> values = new HashMap();
+            values.put("shiftStart", shiftStart);
+            values.put("shiftStop", shiftStop);
+            values.put("lunchStart", lunchStart);
+            values.put("lunchStop", lunchStop);
+            values.put("startDock", startDock);
+            values.put("stopDock", stopDock);
+            values.put("startInterval", startInterval);
+            values.put("stopInterval", stopInterval);
+            values.put("startGrace", startGrace);
+            values.put("stopGrace", stopGrace);
+            
+            return values;
+    }
     
     public String printAdjustedTimestamp(){ 
         
@@ -270,5 +298,9 @@ public class Punch {
             output.append( " (" + this.adjustmenttype + ")");
             
             return output.toString();
+    }
+    
+    public long getAdjustedTimeStamp(){
+        return this.adjustedtimestamp.getTimeInMillis();
     }
 }
