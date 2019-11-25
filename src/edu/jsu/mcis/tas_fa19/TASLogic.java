@@ -63,42 +63,47 @@ public class TASLogic {
 
     public static int calculateTotalMinutes(ArrayList<Punch> punches, Shift shift) {
 
-        boolean pair = false;
         long in = 0;
         long out = 0;
         long beforeLunch = 0;
         long afterLunch = 0;
-        int gotPunch = 0;
 
         for (Punch punch : punches) {
 
-            HashMap<String, Long> shiftTimes = punch.getShiftTimes(shift);
-
-                switch(punch.getPunchtypeid()) {
-                    // Clock-Out
-                    case 0:
-                        out = punch.getAdjustedTimeStamp();
-                        //Gives Minutes
-                        out = (out / 1000) * 60;
-                        // Clock-In
-                    case 1:
-                        in = punch.getAdjustedTimeStamp();
-                        //Gives Minutes
-                        in = (in / 1000) * 60;
-                        // Time-Out
-                    case 2:
-                        gotPunch++;
-                }
+            switch(punch.getPunchtypeid()) {
+                // Clock-Out
+                case 0:
+                    out = punch.getAdjustedTimeStamp();
+                    //Gives Minutes
+                    out = (out / 1000) * 60;
+                    break;
+                //Clock-In
+                case 1:
+                    in = punch.getAdjustedTimeStamp();
+                    //Gives Minutes
+                    in = (in / 1000) * 60;
+                    break;
+                //Time-Out
+                case 2:
+                    //Case 2 Logic
+                    break;
             }
 
-            if (beforeLunch == 0) {
+            //If the employee clocked out, check if it was before or after lunch, and then store those
+            //to be added together for the total minutes worked later
+            if (out != 0 && beforeLunch == 0) {
                 beforeLunch = (out - in);
             }
-            else if (afterLunch == 0) {
+            else if (out != 0 && afterLunch == 0) {
                 afterLunch = (out - in);
             }
 
-        int m = (int) ((beforeLunch) + (afterLunch));
+            out = 0;
+
+        }
+
+        //Calculate the total minutes worked
+        int m = (int) ((((beforeLunch) + (afterLunch)) / 60) / 60);
 
         return m;
     }
