@@ -6,6 +6,7 @@ import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 
 public class Punch {    
     private int id;
@@ -87,6 +88,10 @@ public class Punch {
     public long getOriginaltimestamp() {
         return originalTimeStamp;
     }
+    
+    public String getAdjustmentType(){
+        return this.adjustmenttype;
+    }
 
     //Changed "String" to "int"
     public void setID(int id) {
@@ -112,9 +117,102 @@ public class Punch {
 
             int dayOfWeek = adjustedtimestamp.get(Calendar.DAY_OF_WEEK);
             int shiftinterval = s.getInterval();//in minutes
-
-            //getting start of shift parameters in milliseconds
-            int startHour = s.getStart().getHour();
+            
+            HashMap<String, Long> values = getShiftTimes(s);
+            
+            long shiftStart = values.get("shiftStart");
+            long shiftStop = values.get("shiftStop");
+            long lunchStart = values.get("lunchStart");
+            long lunchStop = values.get("lunchStop");
+            long startGrace = values.get("startGrace");
+            long stopGrace = values.get("stopGrace");
+            long startDock = values.get("startDock");
+            long stopDock = values.get("stopDock");
+            long startInterval = values.get("startInterval");
+            long stopInterval = values.get("stopInterval");
+            
+            
+            
+            switch(this.punchtypeid){
+            
+                case 0://clock out
+                    if((originalTimeStamp >= lunchStart) && (originalTimeStamp <= lunchStop)){//start of lunch
+                        this.adjustmenttype = "Lunch Start";
+                        this.adjustedTimeStampInMill = lunchStart;
+                        this.adjustedtimestamp.setTimeInMillis(adjustedTimeStampInMill);
+                    }
+                    else if((originalTimeStamp < stopGrace) && (originalTimeStamp >= stopDock)){//stop dock
+                        this.adjustmenttype = "Shift Dock";
+                        this.adjustedTimeStampInMill = stopDock;
+                        this.adjustedtimestamp.setTimeInMillis(adjustedTimeStampInMill);
+                    }
+                    else if((originalTimeStamp >= stopGrace) && (originalTimeStamp <= shiftStop)){//stop grace
+                        this.adjustmenttype = "Shift Stop";
+                        this.adjustedTimeStampInMill = shiftStop; 
+                        this.adjustedtimestamp.setTimeInMillis(adjustedTimeStampInMill);
+                    }
+                    else if((originalTimeStamp >= shiftStop) && (originalTimeStamp <= stopInterval)){//stop interval
+                        this.adjustmenttype = "Shift Stop";
+                        this.adjustedTimeStampInMill = shiftStop;
+                        this.adjustedtimestamp.setTimeInMillis(adjustedTimeStampInMill);
+                    }  
+                    else{
+                        this.adjustedtimestamp.setTimeInMillis(gc.getTimeInMillis());
+                        this.adjustmenttype = "None";
+                        this.adjustedtimestamp.set(Calendar.SECOND, 0);
+                    }
+                    break;
+                case 1://clock in
+                    
+                    if((originalTimeStamp >= startInterval) && (originalTimeStamp <= shiftStart)){//start interval
+                        this.adjustmenttype = "Shift Start";
+                        this.adjustedTimeStampInMill = shiftStart; 
+                        this.adjustedtimestamp.setTimeInMillis(adjustedTimeStampInMill);
+                    }
+                    else if((originalTimeStamp >= shiftStart) && (originalTimeStamp <= startGrace)){////start grace
+                        this.adjustmenttype = "Shift Start";
+                        this.adjustedTimeStampInMill = shiftStart;
+                        this.adjustedtimestamp.setTimeInMillis(adjustedTimeStampInMill);
+                    }
+                    else if((originalTimeStamp > startGrace) && (originalTimeStamp <= startDock)){//start dock
+                        this.adjustmenttype = "Shift Dock";
+                        this.adjustedTimeStampInMill = startDock;
+                        this.adjustedtimestamp.setTimeInMillis(adjustedTimeStampInMill);
+                    }
+                    else if((originalTimeStamp >= lunchStart) && (originalTimeStamp <= lunchStop)){//stop lunch
+                        this.adjustmenttype = "Lunch Stop";
+                        this.adjustedTimeStampInMill = lunchStop;
+                        this.adjustedtimestamp.setTimeInMillis(adjustedTimeStampInMill);  
+                    }   
+                    else{
+                        this.adjustedtimestamp.setTimeInMillis(gc.getTimeInMillis());
+                        this.adjustmenttype = "None";
+                        this.adjustedtimestamp.set(Calendar.SECOND, 0);
+                    }
+                    break;
+            }            
+            
+            if(((adjustedtimestamp.get(Calendar.MINUTE) % shiftinterval) != 0) ||
+                    (dayOfWeek == Calendar.SUNDAY || dayOfWeek == Calendar.SATURDAY)){
+                adjustedtimestamp.setTimeInMillis(gc.getTimeInMillis());
+                
+                if(gc.get(Calendar.MINUTE) % s.getInterval() >= s.getInterval() / 2){ //rounding up               
+                    while((adjustedtimestamp.get(Calendar.MINUTE) % shiftinterval) != 0){
+                        adjustedtimestamp.add(Calendar.MINUTE, 1);
+                    }                    
+                }
+                else{//rounding down                        
+                    while((adjustedtimestamp.get(Calendar.MINUTE) % shiftinterval) != 0){
+                            adjustedtimestamp.add(Calendar.MINUTE, -1);
+                    }
+                }                
+                adjustedtimestamp.set(Calendar.SECOND, 0);
+                this.adjustmenttype = "Interval Round";            
+            }            
+        }
+    public HashMap<String, Long> getShiftTimes(Shift s){
+        
+        int startHour = s.getStart().getHour();
             int startMinute = s.getStart().getMinute();
             
             long intervalMill = s.getInterval() * 60000;
@@ -166,86 +264,22 @@ public class Punch {
             lunchstop.set(Calendar.MINUTE, s.getLunchStop().getMinute());
             lunchstop.set(Calendar.SECOND, 0);
             
-            long lunchStop = lunchstop.getTimeInMillis();               
+            long lunchStop = lunchstop.getTimeInMillis();
             
-            switch(this.punchtypeid){
+            HashMap<String, Long> values = new HashMap();
+            values.put("shiftStart", shiftStart);
+            values.put("shiftStop", shiftStop);
+            values.put("lunchStart", lunchStart);
+            values.put("lunchStop", lunchStop);
+            values.put("startDock", startDock);
+            values.put("stopDock", stopDock);
+            values.put("startInterval", startInterval);
+            values.put("stopInterval", stopInterval);
+            values.put("startGrace", startGrace);
+            values.put("stopGrace", stopGrace);
             
-                case 0://clock out
-                    if((originalTimeStamp >= lunchStart) && (originalTimeStamp <= lunchStop)){//start of lunch
-                        this.adjustmenttype = "Lunch Start";
-                        this.adjustedTimeStampInMill = lunchStart;
-                        this.adjustedtimestamp.setTimeInMillis(adjustedTimeStampInMill);
-                    }
-                    else if((originalTimeStamp < stopGrace) && (originalTimeStamp >= stopDock)){//stop dock
-                        this.adjustmenttype = "Shift Dock";
-                        this.adjustedTimeStampInMill = stopDock;
-                        this.adjustedtimestamp.setTimeInMillis(adjustedTimeStampInMill);
-                    }
-                    else if((originalTimeStamp >= stopGrace) && (originalTimeStamp <= shiftStop)){//stop grace
-                        this.adjustmenttype = "Shift Stop";
-                        this.adjustedTimeStampInMill = shiftStop; 
-                        this.adjustedtimestamp.setTimeInMillis(adjustedTimeStampInMill);
-                    }
-                    else if((originalTimeStamp >= shiftStop) && (originalTimeStamp <= stopInterval)){//stop interval
-                        this.adjustmenttype = "Shift Stop";
-                        this.adjustedTimeStampInMill = shiftStop;
-                        this.adjustedtimestamp.setTimeInMillis(adjustedTimeStampInMill);
-                    }  
-                    else{
-                        this.adjustedtimestamp.setTimeInMillis(gc.getTimeInMillis());
-                        this.adjustmenttype = "None";
-                        this.adjustedtimestamp.set(Calendar.SECOND, 0);
-                    }
-                    break;
-                case 1://clock in
-                    
-                    if((originalTimeStamp >= startInterval) && (originalTimeStamp <= shiftStart)){//start interval
-                        this.adjustmenttype = "Shift Start";
-                        this.adjustedTimeStampInMill = shiftStart; 
-                        this.adjustedtimestamp.setTimeInMillis(adjustedTimeStampInMill);
-                    }
-                    else if((originalTimeStamp >= shiftStart) && (originalTimeStamp <= startGrace)){////start grace
-                        this.adjustmenttype = "Shift Start";
-                        this.adjustedTimeStampInMill = shiftStart;
-                        this.adjustedtimestamp.setTimeInMillis(adjustedTimeStampInMill);
-                    }
-                    else if((originalTimeStamp > startGrace) && (originalTimeStamp <= startDock)){//start dock
-                        this.adjustmenttype = "Shift Dock";
-                        this.adjustedTimeStampInMill = startDock;
-                        this.adjustedtimestamp.setTimeInMillis(adjustedTimeStampInMill);
-                    }
-                    else if((originalTimeStamp >= lunchStart) && (originalTimeStamp <= lunchStop)){//start lunch
-                        this.adjustmenttype = "Lunch Stop";
-                        this.adjustedTimeStampInMill = lunchStop;
-                        this.adjustedtimestamp.setTimeInMillis(adjustedTimeStampInMill);                      
-                    }   
-                    else{
-                        this.adjustedtimestamp.setTimeInMillis(gc.getTimeInMillis());
-                        this.adjustmenttype = "None";
-                        this.adjustedtimestamp.set(Calendar.SECOND, 0);
-                    }
-                    break;
-            }            
-            
-            if(((adjustedtimestamp.get(Calendar.MINUTE) % shiftinterval) != 0) ||
-                    (dayOfWeek == Calendar.SUNDAY || dayOfWeek == Calendar.SATURDAY)){
-                adjustedtimestamp.setTimeInMillis(gc.getTimeInMillis());
-                
-                if(gc.get(Calendar.MINUTE) % s.getInterval() >= s.getInterval() / 2){ //rounding up               
-                    while((adjustedtimestamp.get(Calendar.MINUTE) % shiftinterval) != 0){
-                        adjustedtimestamp.add(Calendar.MINUTE, 1);
-                    }                    
-                }
-                else{//rounding down                        
-                    while((adjustedtimestamp.get(Calendar.MINUTE) % shiftinterval) != 0){
-                            adjustedtimestamp.add(Calendar.MINUTE, -1);
-                    }
-                }                
-                adjustedtimestamp.set(Calendar.SECOND, 0);
-                this.adjustmenttype = "Interval Round";            
-            }            
-        }
-    
+            return values;
+    }
     
     public String printAdjustedTimestamp(){ 
         
@@ -270,5 +304,9 @@ public class Punch {
             output.append( " (" + this.adjustmenttype + ")");
             
             return output.toString();
+    }
+    
+    public long getAdjustedTimeStamp(){
+        return this.adjustedtimestamp.getTimeInMillis();
     }
 }
