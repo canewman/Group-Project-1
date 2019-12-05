@@ -88,6 +88,10 @@ public class Punch {
     public long getOriginaltimestamp() {
         return originalTimeStamp;
     }
+    
+    public String getAdjustmentType(){
+        return this.adjustmenttype;
+    }
 
     //Changed "String" to "int"
     public void setID(int id) {
@@ -126,6 +130,8 @@ public class Punch {
             long stopDock = values.get("stopDock");
             long startInterval = values.get("startInterval");
             long stopInterval = values.get("stopInterval");
+            
+            
             
             switch(this.punchtypeid){
             
@@ -173,10 +179,10 @@ public class Punch {
                         this.adjustedTimeStampInMill = startDock;
                         this.adjustedtimestamp.setTimeInMillis(adjustedTimeStampInMill);
                     }
-                    else if((originalTimeStamp >= lunchStart) && (originalTimeStamp <= lunchStop)){//start lunch
+                    else if((originalTimeStamp >= lunchStart) && (originalTimeStamp <= lunchStop)){//stop lunch
                         this.adjustmenttype = "Lunch Stop";
                         this.adjustedTimeStampInMill = lunchStop;
-                        this.adjustedtimestamp.setTimeInMillis(adjustedTimeStampInMill);                      
+                        this.adjustedtimestamp.setTimeInMillis(adjustedTimeStampInMill);  
                     }   
                     else{
                         this.adjustedtimestamp.setTimeInMillis(gc.getTimeInMillis());
