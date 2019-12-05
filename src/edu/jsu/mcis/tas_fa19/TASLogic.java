@@ -1,6 +1,7 @@
 package edu.jsu.mcis.tas_fa19;
 
 import java.util.*;
+import org.json.simple.JSONValue;
 
 public class TASLogic {
     public static int calculateTotalMinutes(ArrayList<Punch> punches, Shift shift) {
@@ -61,5 +62,28 @@ public class TASLogic {
         if(!tookLunch){m = m - lunchDeduct;}
         
         return m;
+    }
+    
+    public static String getPunchListAsJSON(ArrayList<Punch> dailypunchlist){
+  
+        ArrayList<HashMap<String, String>> jsonData = new ArrayList();
+        
+        for(Punch p : dailypunchlist){
+            
+            HashMap<String, String>  punchData = new HashMap<>();
+            punchData.put("punchdata", p.getAdjustmentType());
+            punchData.put("originaltimestamp", String.valueOf(p.getOriginaltimestamp()));
+            punchData.put("badgeid", p.getBadgeid());
+            punchData.put("adjustedtimestamp", String.valueOf(p.getAdjustedTimeStamp()));
+            punchData.put("punchtypeid", String.valueOf(p.getPunchtypeid()));
+            punchData.put("terminalid", String.valueOf(p.getTerminalid()));
+            punchData.put("id", String.valueOf(p.getID()));
+            
+            jsonData.add(punchData);
+        }
+        
+        String json = JSONValue.toJSONString(jsonData);
+
+        return json;
     }
 }
