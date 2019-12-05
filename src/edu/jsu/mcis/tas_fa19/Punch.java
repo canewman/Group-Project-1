@@ -86,7 +86,7 @@ public class Punch {
     }
 
     public long getOriginaltimestamp() {
-        return originalTimeStamp;
+        return this.gc.getTimeInMillis();
     }
     
     public String getAdjustmentType(){
