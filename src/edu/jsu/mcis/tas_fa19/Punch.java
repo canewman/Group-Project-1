@@ -310,8 +310,4 @@ public class Punch {
     public long getAdjustedTimeStamp(){
         return this.adjustedtimestamp.getTimeInMillis();
     }
-    
-    public String getAdjustmentType(){
-        return this.adjustmenttype;
-    }
 }
